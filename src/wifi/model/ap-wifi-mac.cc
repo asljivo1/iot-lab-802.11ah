@@ -1146,7 +1146,6 @@ ApWifiMac::SendOneBeacon (void)
 			// 32nd TIM in this DTIM can contain DL information for (1) STAs that do not support page slicing or (2)STAs that support page slicing and
 			// whose AID is within 32nd block of this page
 			m_PageSliceNum = 31;
-			// TODO
 		}
 		else if (m_pageslice.GetPageSliceLen() == 1)
 		{
@@ -1287,9 +1286,11 @@ ApWifiMac::SendOneBeacon (void)
       params.DisableAck();
       params.DisableNextData();
       Time bufferTimeToAllowBeaconToBeReceived = m_low->CalculateOverallTxTime(packet, &hdr, params);
-      //bufferTimeToAllowBeaconToBeReceived = MicroSeconds (5600);
+      m_bufferTimeToAllowBeaconToBeReceived = bufferTimeToAllowBeaconToBeReceived;
       NS_LOG_DEBUG(
     		  "Transmission of beacon will take " << bufferTimeToAllowBeaconToBeReceived << ", delaying RAW start for that amount");
+
+      m_rawSlotsEdca[0].find(AC_VO)->second->SetRawSlotDuration(m_sharedSlotDuration + m_bufferTimeToAllowBeaconToBeReceived);
 
       auto nRaw = m_rps->GetNumberOfRawGroups();
       currentRawGroup = (currentRawGroup + 1) % nRaw;
@@ -1433,6 +1434,13 @@ ApWifiMac::OnRAWSlotEnd (uint16_t rps, uint8_t rawGroup, uint8_t slot)
 	// There can only be enough time for contention after the last RAW group in the beacon interval
 	uint32_t numOfSlotsInLastGroup = m_rpsset.rpsset.at(m_rpsIndexTrace - 1)->GetRawAssigmentObj(numberOfRawGroupsInThisRps - 1).GetSlotNum();
 	Time sharedSlotDuration = rawGroup == numberOfRawGroupsInThisRps && slot == numOfSlotsInLastGroup ? GetBeaconInterval () - totalRawDuration : Time ();
+
+	// for shared slot after all RAW groups, its duration is reduced for the delay of the first RAW group
+	// (first raw group is delayed, it starts after the beaconTxTime)
+	// shared slot in between RAW groups has duration of 0, that one we do not reduce
+	sharedSlotDuration = sharedSlotDuration > Time () ? sharedSlotDuration - m_bufferTimeToAllowBeaconToBeReceived : Time ();
+	NS_ASSERT (sharedSlotDuration >= 0); // if sharedSlotDuration < 0 then there is even not enough time to receive beacon, RAW config is incorrect
+	m_sharedSlotDuration = sharedSlotDuration;
 	bool csb = false;
 	// Station cannot cross shared slot's boundary ONLY if they are not allowed to cross the boundary of the next RAW
 	// If cross-slot-boundary equals 0 for the next RAW, forbid transmissions longer than sharedSlotDuration
@@ -1456,7 +1464,7 @@ ApWifiMac::OnRAWSlotEnd (uint16_t rps, uint8_t rawGroup, uint8_t slot)
 
 	if (m_qosSupported)
 	{
-		NotifyEdcaOfCsb (Simulator::Now(), sharedSlotDuration, csb);
+		NotifyEdcaOfCsb (Simulator::Now(), m_sharedSlotDuration, csb);
 		m_rawSlotsEdca[targetSlot].find(AC_VO)->second->AccessAllowedIfRaw(false);
 		m_rawSlotsEdca[targetSlot].find(AC_VI)->second->AccessAllowedIfRaw(false);
 		m_rawSlotsEdca[targetSlot].find(AC_BE)->second->AccessAllowedIfRaw(false);
