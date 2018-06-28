@@ -1420,8 +1420,43 @@ ApWifiMac::OnRAWSlotEnd (uint16_t rps, uint8_t rawGroup, uint8_t slot)
 	//Time slotDuration = MicroSeconds(m_rpsset.rpsset.at(rps - 1)->GetRawAssigmentObj(rawGroup - 1).GetSlotDurationCount() * 120 + 500);
 	//std::cout << "OnRAWSlotEnd Access DENIED to targetSlot=" << targetSlot << std::endl;
 
+	Time totalRawDuration = Time ();
+	uint32_t numberOfRawGroupsInThisRps = m_rpsset.rpsset.at(m_rpsIndexTrace - 1)->GetNumberOfRawGroups();
+	for (uint32_t i = 0; i < numberOfRawGroupsInThisRps; i++)
+	{
+		auto ass = m_rpsset.rpsset.at(m_rpsIndexTrace - 1)->GetRawAssigmentObj(i);
+		totalRawDuration += ass.GetSlotDuration() * ass.GetSlotNum();
+	}
+	// TODO: When RAW start time can be arbitrary, then adjust sharedSlotDuration in between sequential RAW groups
+	// RAW start time is NOT configurable now. It is hardcoded: next RAW group starts after the current one OR after the beacon
+	// Therefore shared slot in between sequential RAW groups is 0
+	// There can only be enough time for contention after the last RAW group in the beacon interval
+	uint32_t numOfSlotsInLastGroup = m_rpsset.rpsset.at(m_rpsIndexTrace - 1)->GetRawAssigmentObj(numberOfRawGroupsInThisRps - 1).GetSlotNum();
+	Time sharedSlotDuration = rawGroup == numberOfRawGroupsInThisRps && slot == numOfSlotsInLastGroup ? GetBeaconInterval () - totalRawDuration : Time ();
+	bool csb = false;
+	// Station cannot cross shared slot's boundary ONLY if they are not allowed to cross the boundary of the next RAW
+	// If cross-slot-boundary equals 0 for the next RAW, forbid transmissions longer than sharedSlotDuration
+	if (rawGroup < m_rpsset.rpsset.at(rps - 1)->GetNumberOfRawGroups())
+	{
+		// take csb value of the next RAW group in the same RPS
+		csb = m_rpsset.rpsset.at(rps - 1)->GetRawAssigmentObj(rawGroup).GetSlotCrossBoundary() == 0x01;
+	}
+	else if (rps < m_rpsset.rpsset.size())
+	{
+		// given that this RAW group is the last one in this RPS
+		// take csb value of the first RAW group in the next RPS
+		csb = m_rpsset.rpsset.at(rps)->GetRawAssigmentObj(0).GetSlotCrossBoundary() == 0x01;
+	}
+	else
+	{
+		// this is the last RAW group in the last RPS
+		// take csb value of the first RAW group of the first RPS
+		csb = m_rpsset.rpsset.at(0)->GetRawAssigmentObj(0).GetSlotCrossBoundary() == 0x01;
+	}
+
 	if (m_qosSupported)
 	{
+		NotifyEdcaOfCsb (Simulator::Now(), sharedSlotDuration, csb);
 		m_rawSlotsEdca[targetSlot].find(AC_VO)->second->AccessAllowedIfRaw(false);
 		m_rawSlotsEdca[targetSlot].find(AC_VI)->second->AccessAllowedIfRaw(false);
 		m_rawSlotsEdca[targetSlot].find(AC_BE)->second->AccessAllowedIfRaw(false);
@@ -1430,14 +1465,29 @@ ApWifiMac::OnRAWSlotEnd (uint16_t rps, uint8_t rawGroup, uint8_t slot)
 		m_rawSlotsEdca[targetSlot].find(AC_VI)->second->OutsideRawStart();
 		m_rawSlotsEdca[targetSlot].find(AC_BE)->second->OutsideRawStart();
 		m_rawSlotsEdca[targetSlot].find(AC_BK)->second->OutsideRawStart();
-		//m_rawSlotsEdca[targetSlot][AC_BE]->AccessAllowedIfRaw(false);
-		//m_rawSlotsEdca[targetSlot][AC_BE]->OutsideRawStart();
 	}
 	else
 	{
 		m_rawSlotsDca[targetSlot]->AccessAllowedIfRaw(false);
 		m_rawSlotsDca[targetSlot]->OutsideRawStart();
 	}
+}
+
+void ApWifiMac::NotifyEdcaOfCsb (Time rawSlotStart, Time slotDuration, bool csb)
+{
+	// Since the following methods are static, it doesn-t matter which member of m_rawSlotsEdca vector we use
+	m_rawSlotsEdca[0].find(AC_VO)->second->SetRawStartTime(rawSlotStart);
+	m_rawSlotsEdca[0].find(AC_VO)->second->SetRawSlotDuration(slotDuration);
+	m_rawSlotsEdca[0].find(AC_VO)->second->SetCrossSlotBoundary(csb);
+	m_rawSlotsEdca[0].find(AC_VI)->second->SetRawStartTime(rawSlotStart);
+	m_rawSlotsEdca[0].find(AC_VI)->second->SetRawSlotDuration(slotDuration);
+	m_rawSlotsEdca[0].find(AC_VI)->second->SetCrossSlotBoundary(csb);
+	m_rawSlotsEdca[0].find(AC_BE)->second->SetRawStartTime(rawSlotStart);
+	m_rawSlotsEdca[0].find(AC_BE)->second->SetRawSlotDuration(slotDuration);
+	m_rawSlotsEdca[0].find(AC_BE)->second->SetCrossSlotBoundary(csb);
+	m_rawSlotsEdca[0].find(AC_BK)->second->SetRawStartTime(rawSlotStart);
+	m_rawSlotsEdca[0].find(AC_BK)->second->SetRawSlotDuration(slotDuration);
+	m_rawSlotsEdca[0].find(AC_BK)->second->SetCrossSlotBoundary(csb);
 }
 
 void ApWifiMac::OnRAWSlotStart (uint16_t rps, uint8_t rawGroup, uint8_t slot)
@@ -1457,16 +1507,16 @@ void ApWifiMac::OnRAWSlotStart (uint16_t rps, uint8_t rawGroup, uint8_t slot)
 	//std::cout << "rps=" << (int)rps-1 << ", rawGroup=" << (int)rawGroup-1 << ", slot=" << (int)slot-1 << std::endl;
 	if (m_qosSupported)
 	{
-		//m_rawSlotsEdca[targetSlot][AC_BE]->AccessAllowedIfRaw(true);
+		NotifyEdcaOfCsb (Simulator::Now(), slotDuration, csb);
 		m_rawSlotsEdca[targetSlot].find(AC_VO)->second->AccessAllowedIfRaw(true);
 		m_rawSlotsEdca[targetSlot].find(AC_VI)->second->AccessAllowedIfRaw(true);
 		m_rawSlotsEdca[targetSlot].find(AC_BE)->second->AccessAllowedIfRaw(true);
 		m_rawSlotsEdca[targetSlot].find(AC_BK)->second->AccessAllowedIfRaw(true);
-		m_rawSlotsEdca[targetSlot].find(AC_VO)->second->RawStart(slotDuration, csb);
-		m_rawSlotsEdca[targetSlot].find(AC_VI)->second->RawStart(slotDuration, csb);
-		m_rawSlotsEdca[targetSlot].find(AC_BE)->second->RawStart(slotDuration, csb);
-		m_rawSlotsEdca[targetSlot].find(AC_BK)->second->RawStart(slotDuration, csb);
-		//m_rawSlotsEdca[targetSlot][AC_BE]->RawStart(slotDuration, m_rpsset.rpsset.at(rps - 1)->GetRawAssigmentObj(rawGroup - 1).GetSlotCrossBoundary());
+		m_rawSlotsEdca[targetSlot].find(AC_VO)->second->RawStart();
+		m_rawSlotsEdca[targetSlot].find(AC_VI)->second->RawStart();
+		m_rawSlotsEdca[targetSlot].find(AC_BE)->second->RawStart();
+		m_rawSlotsEdca[targetSlot].find(AC_BK)->second->RawStart();
+		//m_rawSlotsEdca[targetSlot][AC_BE]->RawStart();
 	}
 	else
 	{
