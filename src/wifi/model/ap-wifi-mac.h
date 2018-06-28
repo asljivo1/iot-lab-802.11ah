@@ -329,6 +329,8 @@ private:
   bool m_pageSlicingActivated;
   Time m_lastBeaconTime;
   static uint16_t RpsIndex;
+  Time m_bufferTimeToAllowBeaconToBeReceived;
+  Time m_sharedSlotDuration;
 };
 
 } //namespace ns3

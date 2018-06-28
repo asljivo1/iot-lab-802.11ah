@@ -342,7 +342,6 @@ EdcaTxopN::SetCrossSlotBoundary (const bool csb)
 const Time&
 EdcaTxopN::GetRawStartTime (void)
 {
-	NS_ASSERT (Simulator::Now() - rawStartTime () <= rawDuration ());
 	return rawStartTime ();
 }
 
@@ -549,7 +548,7 @@ EdcaTxopN::NotifyAccessGranted (void)
 {
   NS_LOG_FUNCTION (this);
   Time remainingRawTime = GetRawSlotDuration () - (Simulator::Now() - GetRawStartTime ());
-  NS_LOG_DEBUG ("cross-slot boundary=" << GetCrossSlotBoundary () << ", slot duration=" << GetRawSlotDuration() << ", slot start time=" << GetRawStartTime());
+  NS_LOG_DEBUG ("cross-slot boundary=" << GetCrossSlotBoundary () << ", slot duration=" << GetRawSlotDuration() << ", slot start time=" << GetRawStartTime() << ", now=" << Simulator::Now());
   NS_ASSERT (remainingRawTime >= 0);
   if (!AccessIfRaw)
     {
