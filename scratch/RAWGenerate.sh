@@ -12,6 +12,7 @@ NumSlot=$3
 beaconinterval=$4
 pageSliceCount=0
 pageSliceLen=31
+crossSlotBoundary=1
 
 
 
@@ -24,7 +25,7 @@ pageSliceLen=31
 RAWConfigPath="./OptimalRawGroup/RawConfig-$NumSta-$NRawGroups-$NumSlot-$beaconinterval-$pageSliceCount-$pageSliceLen.txt"
 #-$pagePeriod-$pageSliceLength-$pageSliceCount
 
-./waf --run "RAW-generate --NRawSta=$NumSta --NGroup=$NRawGroups --NumSlot=$NumSlot --RAWConfigPath=$RAWConfigPath --beaconinterval=$beaconinterval --pageSliceCount=$pageSliceCount --pageSliceLen=$pageSliceLen"
+./waf --run "RAW-generate --NRawSta=$NumSta --NGroup=$NRawGroups --NumSlot=$NumSlot --RAWConfigPath=$RAWConfigPath --beaconinterval=$beaconinterval --pageSliceCount=$pageSliceCount --pageSliceLen=$pageSliceLen --crossSlotBoundary=$crossSlotBoundary"
 
 #./waf --run RAW-generate --command-template="gdb --args %s <args> --NRawSta=$NumSta --NGroup=$NRawGroups --NumSlot=$NumSlot --RAWConfigPath=$RAWConfigPath --beaconinterval=$beaconinterval --pageSliceCount=$pageSliceCount --pageSliceLen=$pageSliceLen"
 

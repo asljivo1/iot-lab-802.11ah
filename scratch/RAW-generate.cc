@@ -56,7 +56,7 @@ Add current RawConfig information into file RawConfiglog.txt
 using namespace std;
 using namespace ns3;
 
-void RAWGroupping (uint16_t Numsta, uint16_t NGroups, uint16_t NumSlot, uint16_t trial, string RAWConfigPath, uint32_t beaconinterval, uint32_t pageSliceCount, uint32_t pageSliceLen)
+void RAWGroupping (uint16_t Numsta, uint16_t NGroups, uint16_t NumSlot, uint16_t trial, string RAWConfigPath, uint32_t beaconinterval, uint32_t pageSliceCount, uint32_t pageSliceLen, uint16_t crossSlotBoundary)
 {
     uint16_t NRawSta;
     uint16_t NRawGroups;
@@ -65,7 +65,7 @@ void RAWGroupping (uint16_t Numsta, uint16_t NGroups, uint16_t NumSlot, uint16_t
 
 
     uint16_t RawControl = 0;
-    uint16_t SlotCrossBoundary = 1;
+    uint16_t SlotCrossBoundary = crossSlotBoundary;
     uint16_t SlotFormat = 1;
     uint16_t SlotDurationCount = 829;
     uint16_t SlotNum = 1;
@@ -73,11 +73,13 @@ void RAWGroupping (uint16_t Numsta, uint16_t NGroups, uint16_t NumSlot, uint16_t
     uint32_t aid_start = 0;
     uint32_t aid_end = 0;
     
+    NS_ASSERT (SlotCrossBoundary <= 1);
+
     NRawSta = Numsta;
     NRawGroups = NGroups;
     SlotNum = NumSlot;
     SlotDurationCount = (beaconinterval/NGroups/(SlotNum) - 500)/120;
-    
+
 	if (Numsta < pageSliceLen * 64 && pageSliceCount != 0)
 	{
 		std::cerr << "All stations can fit to a single page slice. Too many page slices relative to the number of stations. Set PageSliceCount=0 PageSliceLength=1 or reduce Page Slice Length." << std::endl;
@@ -194,7 +196,7 @@ int main (int argc, char *argv[])
   uint16_t NRawSta;
   uint16_t NGroup;
   uint16_t trial=0;
-  uint16_t NumSlot;
+  uint16_t NumSlot, crossSlotBoundary;
   uint32_t beaconinterval;
   string RAWConfigPath;
   uint32_t pageSliceLen, pageSliceCount;
@@ -207,18 +209,18 @@ int main (int argc, char *argv[])
     cmd.AddValue ("RAWConfigPath", "RAW Config file Path", RAWConfigPath);
     cmd.AddValue ("pageSliceCount", "RAW Config file Path", pageSliceCount);
     cmd.AddValue ("pageSliceLen", "RAW Config file Path", pageSliceLen);
-
+    cmd.AddValue ("crossSlotBoundary", "RAW Config file Path", crossSlotBoundary);
     cmd.Parse (argc,argv);
     
-    std::cout << "NRawSta=" << NRawSta <<  " NGroup=" << NGroup << " beaconinterval=" << beaconinterval << "RAWConfigPath=" << RAWConfigPath << "\n";
+    std::cout << "NRawSta=" << NRawSta <<  " NGroup=" << NGroup << " beaconinterval=" << beaconinterval << " RAWConfigPath=" << RAWConfigPath << " crossSlotBoundary=" << (int)crossSlotBoundary << std::endl;
     
-    void RAWGroupping (uint16_t, uint16_t, uint16_t, uint16_t, string, uint32_t, uint32_t, uint32_t);
+    void RAWGroupping (uint16_t, uint16_t, uint16_t, uint16_t, string, uint32_t, uint32_t, uint32_t, uint16_t);
     
 
 
  
     
-  RAWGroupping (NRawSta, NGroup, NumSlot, trial, RAWConfigPath, beaconinterval, pageSliceCount, pageSliceLen);
+  RAWGroupping (NRawSta, NGroup, NumSlot, trial, RAWConfigPath, beaconinterval, pageSliceCount, pageSliceLen, crossSlotBoundary);
     
   return 0;
 }
