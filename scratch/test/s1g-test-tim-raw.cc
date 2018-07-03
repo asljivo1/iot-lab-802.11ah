@@ -155,6 +155,7 @@ RPSVector configureRAW (RPSVector rpslist, string RAWConfigFile)
 				m_raw->SetRawControl(Value);  //support paged STA or not
 				myfile >> Value;
 				m_raw->SetSlotCrossBoundary(Value);
+				config.crossSlotBoundary = Value;
 				myfile >> Value;
 				m_raw->SetSlotFormat(Value);
 				myfile >> Value;
@@ -1566,8 +1567,9 @@ int main(int argc, char *argv[]) {
 				+ config.DataMode + "_"
 				+ config.rho + "rho_"
 				+ std::to_string(config.cycleTime) + "Tl_"
-				+ std::to_string(config.nControlLoops) + "loops"
-				+ ".nss";
+				+ std::to_string(config.nControlLoops) + "loops";
+		if (config.crossSlotBoundary == 0) config.NSSFile += "_NC.nss";
+		else config.NSSFile += ".nss";
 		}
 	stats = Statistics(config.Nsta);
 	eventManager = SimulationEventManager(config.visualizerIP, config.visualizerPort, "./nssfiles/" + config.NSSFile);

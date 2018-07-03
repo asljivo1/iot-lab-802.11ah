@@ -69,6 +69,8 @@ void SimulationEventManager::onStart(Configuration& config) {
 		  std::to_string(config.ContentionPerRAWSlotOnlyInFirstGroup),
 		  config.TrafficPath,
 		  config.rho,
+		  std::to_string(config.nControlLoops),
+		  std::to_string(config.cycleTime),
 		  std::to_string(config.rps.rpsset.size()) //has to be the last here
 		  //config.RawConfigString
 	});
@@ -266,6 +268,7 @@ void SimulationEventManager::onStartHeader() {
 		   "ContentionPerRAWSlotOnlyInFirstGroup",
 		   "TrafficString",
 		   "Radius",
+		   "CrossSlotBoundary",
 		   "NumOfRpsElements"
 		});
 }

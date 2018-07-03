@@ -35,6 +35,7 @@ struct Configuration {
 	// Page slicing
 	pageSlice pageS;
 	TIM tim;
+	uint16_t crossSlotBoundary;
 
 	/*pageSliceCount = 0 means:
 	 *
@@ -65,7 +66,7 @@ struct Configuration {
 	double bandWidth = 2;
 	string rho="200"; //50
 
-	double totaltraffic = 2;
+	double totaltraffic = 0;//2;
 
 	string visualizerIP = "localhost"; // empty string if no visualization TODO
 	int visualizerPort = 7707;
@@ -106,14 +107,14 @@ struct Configuration {
 	/*
 	 * tcpipcamera configuration parameters
 	 * */
-	double ipcameraMotionPercentage = 1; //0.1
-	uint16_t ipcameraMotionDuration = 10; //60
-	uint16_t ipcameraDataRate = 128; //20
-	uint32_t MinRTO = 81920000; //819200
-	uint32_t TCPConnectionTimeout = 6000000;
-	uint32_t TCPSegmentSize  = 3216; //536
-	uint32_t TCPInitialSlowStartThreshold = 0xffff;
-	uint32_t TCPInitialCwnd = 1;
+	double ipcameraMotionPercentage = 0;//1; //10.1
+	uint16_t ipcameraMotionDuration = 0;//10; //60
+	uint16_t ipcameraDataRate = 0;//128; //20
+	uint32_t MinRTO = 0;//81920000; //819200
+	uint32_t TCPConnectionTimeout = 0;//6000000;
+	uint32_t TCPSegmentSize  = 0;//3216; //536
+	uint32_t TCPInitialSlowStartThreshold = 0;//0xffff;
+	uint32_t TCPInitialCwnd = 0;//1;
 
 	int ContentionPerRAWSlot=0; //-1
 	bool ContentionPerRAWSlotOnlyInFirstGroup=false; //false
