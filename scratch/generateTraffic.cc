@@ -59,8 +59,8 @@ int main (int argc, char *argv[])
 	bool random;
 	CommandLine cmd;
 	cmd.AddValue ("nsta", "number of stations", nsta);
-	cmd.AddValue ("throughput", "number of RAW groups", throughput);
-	cmd.AddValue ("random", "number of slot per Raw", random);
+	cmd.AddValue ("throughput", "total throughput in mbps", throughput);
+	cmd.AddValue ("random", "whether to randomize or not", random);
 	cmd.Parse (argc,argv);
 
 	std::ostringstream pathss;
@@ -70,17 +70,17 @@ int main (int argc, char *argv[])
 	ofstream newfile;
 	newfile.open (filepath, ios::out | ios::trunc);
 
-	for (int i = 1; i <= nsta; i++)
+	for (int i = 0; i < nsta; i++)
 	{
 		newfile << i << "\t";
 		if (random)
 		{
 			Ptr<UniformRandomVariable> m_rv = CreateObject<UniformRandomVariable>();
-			double randval =  m_rv->GetValue(0, throughput);
+			double randval =  m_rv->GetValue(0, throughput/nsta);
 			newfile << randval << "\n";
 		}
 		else
-			newfile << throughput << "\n";
+			newfile << throughput/nsta << "\n";
 	}
 
 	newfile.close();

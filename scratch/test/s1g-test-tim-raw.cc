@@ -1890,14 +1890,14 @@ int main(int argc, char *argv[]) {
 	if (config.trafficType == "udp")
 	{
 		double throughput = 0;
-		uint32_t totalPacketsThrough =
-				DynamicCast<UdpServer>(serverApp.Get(0))->GetReceived();
-		throughput = totalPacketsThrough * config.payloadSize * 8
-				/ (config.simulationTime + config.CoolDownPeriod - stats.TimeWhenEverySTAIsAssociated.GetSeconds() * 1000000.0);
-		cout << "totalPacketsThrough " << totalPacketsThrough << " ++my "
-				<< totalSuccessfulPackets << endl;
-		cout << "throughput " << throughput << " ++my "
-				<< pay * 8. / (config.simulationTime + config.CoolDownPeriod - stats.TimeWhenEverySTAIsAssociated.GetSeconds() * 1000000.0) << endl;
+		//uint32_t totalPacketsThrough = DynamicCast<UdpServer>(serverApp.Get(0))->GetReceived();
+		throughput = totalSuccessfulPackets * config.payloadSize * 8
+				/ ((config.simulationTime + config.CoolDownPeriod - stats.TimeWhenEverySTAIsAssociated.GetSeconds()) * 1000000.0);
+
+		//cout << "EndlAppTime=" << stats.EndApplicationTime.GetSeconds() << " sec"<<std::endl;
+		//cout << "TimeWhenEverySTAIsAssociated=" << stats.TimeWhenEverySTAIsAssociated.GetSeconds() << " sec"<<std::endl;
+		//cout << "totalPacketsThrough " << totalPacketsThrough << " ++my " << totalSuccessfulPackets << endl;
+		//cout << "throughput " << throughput << " ++my " << pay * 8. / ((stats.EndApplicationTime.GetSeconds() - stats.TimeWhenEverySTAIsAssociated.GetSeconds()) * 1000000.0);
 		std::cout << "datarate" << "\t" << "throughput" << std::endl;
 		std::cout << config.datarate << "\t" << throughput << " Mbit/s"
 				<< std::endl;
@@ -1926,8 +1926,8 @@ int main(int argc, char *argv[]) {
 	else if (config.trafficType == "coap")
 	{
 		double ulThroughput = 0, dlThroughput = 0;
-		ulThroughput = totalSuccessfulPackets * config.payloadSize * 8 / (stats.EndApplicationTime.GetSeconds() - stats.TimeWhenEverySTAIsAssociated.GetSeconds() * 1000000.0);
-		dlThroughput = totalPacketsEchoed * config.payloadSize * 8 / (stats.EndApplicationTime.GetSeconds() - stats.TimeWhenEverySTAIsAssociated.GetSeconds() * 1000000.0);
+		ulThroughput = totalSuccessfulPackets * config.payloadSize * 8 / ((config.simulationTime + config.CoolDownPeriod - stats.TimeWhenEverySTAIsAssociated.GetSeconds()) * 1000000.0);
+		dlThroughput = totalPacketsEchoed * config.payloadSize * 8 / ((config.simulationTime + config.CoolDownPeriod - stats.TimeWhenEverySTAIsAssociated.GetSeconds()) * 1000000.0);
 		cout << "totalPacketsSent " << totalSentPackets << endl;
 		cout << "totalPacketsDelivered " << totalSuccessfulPackets << endl;
 		cout << "totalPacketsEchoed " << totalPacketsEchoed << endl;
@@ -1938,8 +1938,8 @@ int main(int argc, char *argv[]) {
 		/*cout << "uplink throughput Mbit/s " << ulThroughput << endl;
 				cout << "downlink throughput Mbit/s " << dlThroughput << endl;*/
 
-		double throughput = (totalSuccessfulPackets + totalPacketsEchoed) * config.payloadSize * 8 / ((stats.EndApplicationTime.GetSeconds() - stats.TimeWhenEverySTAIsAssociated.GetSeconds()) * 1000000.0);
-		cout << "Time apps stoped=" << stats.EndApplicationTime.GetSeconds() << " s" << endl;
+		double throughput = (totalSuccessfulPackets + totalPacketsEchoed) * config.payloadSize * 8 / ((config.simulationTime + config.CoolDownPeriod - stats.TimeWhenEverySTAIsAssociated.GetSeconds()) * 1000000.0);
+		//cout << "Time apps stoped=" << stats.EndApplicationTime.GetSeconds() << " s" << endl;
 		std::cout << "datarate" << "\t" << "throughput Kbit/s" << std::endl;
 		std::cout << config.datarate << "\t" << throughput * 1000 << " Kbit/s" << std::endl;
 	}

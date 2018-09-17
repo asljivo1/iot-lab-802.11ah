@@ -78,7 +78,7 @@ void RAWGroupping (uint16_t Numsta, uint16_t NGroups, uint16_t NumSlot, uint16_t
     NRawSta = Numsta;
     NRawGroups = NGroups;
     SlotNum = NumSlot;
-    SlotDurationCount = (beaconinterval/NGroups/(SlotNum) - 500)/120;
+    SlotDurationCount = ((beaconinterval-5600)/(NGroups*SlotNum) - 500)/120;
 
 	if (Numsta < pageSliceLen * 64 && pageSliceCount != 0)
 	{

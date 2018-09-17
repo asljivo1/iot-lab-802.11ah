@@ -589,6 +589,7 @@ void NodeEntry::OnCoapPacketReceived(Ptr<const Packet> packet, Address from) {
 
 void NodeEntry::OnUdpPacketReceivedAtAP(Ptr<const Packet> packet) {
 	auto pCopy = packet->Copy();
+	stats->get(this->id).EndApplicationTime = Simulator::Now();
 	try {
 
 		SeqTsHeader seqTs;
@@ -598,7 +599,7 @@ void NodeEntry::OnUdpPacketReceivedAtAP(Ptr<const Packet> packet) {
 		//cout << "[" << this->id << "] " << "UDP packet received at AP after "
 		//	<< std::to_string(timeDiff.GetMicroSeconds()) << "µs" << endl;
 		//cout << "+++++++++++udpPacketReceivedAtServer" << endl;
-		if (stats->get(this->id).NumberOfSuccessfulPackets >+ stats->get(this->id).NumberOfSentPackets)
+		if (stats->get(this->id).NumberOfSuccessfulPackets >= stats->get(this->id).NumberOfSentPackets)
 		{
 			cout << "+++++++++++" << Simulator::Now ().GetSeconds() <<": ACK bug" << endl;
 			//stats->get(this->id).NumberOfSuccessfulPackets = stats->get(this->id).NumberOfSentPackets;

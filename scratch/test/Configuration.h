@@ -30,7 +30,7 @@ struct Configuration {
 	uint64_t totalRawSlots = 0;			// Total number of RAW slots in all RAW groups in all RPS elements
 
 	UintegerValue maxNumberOfPackets = 4294967295u; ///4294967295u
-	string trafficType = "udpecho"; // important - udp is considered to be only uplink in NodeStatistics::GetPacketLoss tcpipcamera tcpfirmware
+	string trafficType = "udp"; // important - udp is considered to be only uplink in NodeStatistics::GetPacketLoss tcpipcamera tcpfirmware
 
 	// Page slicing
 	pageSlice pageS;
@@ -47,10 +47,10 @@ struct Configuration {
 	 *
 	 * */
 
-	uint32_t pagePeriod=2;  	//  Number of Beacon Intervals between DTIM beacons that carry Page Slice element for the associated page
+	uint32_t pagePeriod=1;  	//  Number of Beacon Intervals between DTIM beacons that carry Page Slice element for the associated page
 	uint8_t pageIndex = 0;
 	uint32_t pageSliceLength=1; //  Number of blocks in each TIM for the associated page except for the last TIM (1-31) (value 0 is reserved);
-	uint32_t pageSliceCount=2;  //  Number of TIMs in a single page period (1-31)
+	uint32_t pageSliceCount=0;  //  Number of TIMs in a single page period (1-31)
 	uint8_t blockOffset = 0;  	//  The 1st page slice starts with the block with blockOffset number
 	uint8_t timOffset = 0;    	//  Offset in number of Beacon Intervals from the DTIM that carries the first page slice of the page
 	/*
@@ -92,7 +92,7 @@ struct Configuration {
 	 * Amina's configuration parameters
 	 * */
 	bool useV6 = false; //false
-	int nControlLoops = -1;//  = 100;
+	int nControlLoops = 0;//  = 100; // it should be -1
 	//uint32_t coapPayloadSize = 0;//  = 15;
 
 	uint32_t cycleTime;
