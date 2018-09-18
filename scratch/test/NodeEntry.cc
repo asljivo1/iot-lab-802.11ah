@@ -228,7 +228,7 @@ void NodeEntry::OnPhyRxDrop(std::string context, Ptr<const Packet> packet,
 }
 
 void NodeEntry::OnPhyStateChange(std::string context, const Time start,	const Time duration, const WifiPhy::State state) {
-	/*switch (state) {
+	switch (state) {
 
 	case WifiPhy::State::SLEEP:
 		stats->get(this->id).TotalDozeTime += duration;
@@ -245,7 +245,7 @@ void NodeEntry::OnPhyStateChange(std::string context, const Time start,	const Ti
 		// not sure why this is counted as the same as sleep
 		// so state change is fired with the same duration for both SLEEP and CCA_BUSY
 		break;
-	}*/
+	}
 	if  (stats->TimeWhenEverySTAIsAssociated > 0)
 	{
 		switch (state)

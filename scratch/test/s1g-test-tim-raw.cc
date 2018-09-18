@@ -1514,8 +1514,8 @@ int main(int argc, char *argv[]) {
 	//LogComponentEnable ("UdpServer", LOG_LEVEL_INFO);
 	//LogComponentEnable ("UdpEchoServerApplication", LOG_LEVEL_INFO);
 	//LogComponentEnable ("UdpEchoClientApplication", LOG_LEVEL_INFO);
-	LogComponentEnable ("CoapClient", LOG_LEVEL_INFO);
-	LogComponentEnable ("CoapServer", LOG_LEVEL_INFO);
+	//LogComponentEnable ("CoapClient", LOG_LEVEL_INFO);
+	//LogComponentEnable ("CoapServer", LOG_LEVEL_INFO);
 
 	//LogComponentEnable ("ApWifiMac", LOG_LEVEL_DEBUG);
 	//LogComponentEnable ("StaWifiMac", LOG_LEVEL_DEBUG);
@@ -1527,6 +1527,9 @@ int main(int argc, char *argv[]) {
 
 	config.rps = configureRAW(config.rps, config.RAWConfigFile);
 	config.Nsta = config.NRawSta;
+
+	if (config.pageSliceLength!=1 || config.pagePeriod!=1)
+		config.pageSliceCount = config.pagePeriod;
 
 	configurePageSlice ();
 	configureTIM ();
@@ -1563,6 +1566,7 @@ int main(int argc, char *argv[]) {
 				+ std::to_string(config.NRawSlotNum) + "slots_"
 				+ std::to_string(config.trafficInterval) + "s_"
 				+ std::to_string(config.BeaconInterval) + "BI_"
+				+ std::to_string(config.pagePeriod) + "pp_"
 				+ std::to_string(config.simulationTime) + "Tsim_"
 				+ std::to_string(config.seed) + "seed_"
 				+ config.DataMode + "_"
@@ -1969,6 +1973,9 @@ int main(int argc, char *argv[]) {
 	int i = 0;
 	ns3::int64x64_t totenergycons = 0;
 	string spazio = "         ";
+	double totalSleepTime = 0;
+	double totalTxTime=0;
+	double totalRxTime=0, totalIdleTime=0, totalEnerg=0, totalActive=0, totalDoze=0;
 
 	while (i < config.Nsta) {
 		totenergycons = (timeRxArray[i].GetSeconds() * 4.4)
@@ -1983,17 +1990,25 @@ int main(int argc, char *argv[]) {
 
 		totenergycons = 0;
 
-		/*
-		 cout << "================== Sleep " << stats.get(i).TotalSleepTime.GetSeconds() << endl;
-		 cout << "================== Tx " << stats.get(i).TotalTxTime.GetSeconds() << endl;
-		 cout << "================== Rx " << stats.get(i).TotalRxTime.GetSeconds() << endl;
-		 cout << "+++++++++++++++++++IDLE " << stats.get(i).TotalIdleTime.GetSeconds() << endl;
-		 cout << "ooooooooooooooooooo TOTENERGY " <<  stats.get(i).GetTotalEnergyConsumption() << " mW" << endl;
-		 cout << "Rx+Idle ENERGY " <<  stats.get(i).EnergyRxIdle << " mW" << endl;
-		 cout << "Tx ENERGY " <<  stats.get(i).EnergyTx << " mW" << endl;*/
 
+		totalSleepTime += stats.get(i).TotalSleepTime.GetSeconds();
+		totalTxTime += stats.get(i).TotalTxTime.GetSeconds();
+		totalRxTime += stats.get(i).TotalRxTime.GetSeconds();
+		totalIdleTime += stats.get(i).TotalIdleTime.GetSeconds();
+		totalEnerg += stats.get(i).GetTotalEnergyConsumption();
+
+		totalActive += stats.get(i).TotalActiveTime.GetSeconds();
+		totalDoze += stats.get(i).TotalDozeTime.GetSeconds();
 		i++;
 	}
+	 cout << endl;
+	 cout << "Total energ = " << totalEnerg << endl;
+	 cout << "sleep time = " << totalSleepTime << endl;
+	 cout << "TX time = " << totalTxTime << endl;
+	 cout << "RX time = " << totalRxTime << endl << endl;
+
+	 cout << "Active time = " << totalActive << endl;
+	 cout << "Doze time = " << totalDoze << endl;
 
 	risultati.close();
 	return 0;
