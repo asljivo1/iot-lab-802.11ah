@@ -40,6 +40,9 @@ Configuration::Configuration(int argc, char *argv[]) {
     cmd.AddValue("nControlLoops", "Number of control loops. If -1 all the stations will be in the loops if NSta is even", nControlLoops);
     cmd.AddValue("PrintStats", "Print statistics of each node to ./results-coap/", PrintStats);
     cmd.AddValue("CycleTime", "Cycle time of all control loops", cycleTime);
+    cmd.AddValue("IpCameraDataRate", "Data rate of the captured stream in kbps", ipcameraDataRate);
+    cmd.AddValue("TCPSegmentSize", "TCP Segment size in bytes", TCPSegmentSize);
+    cmd.AddValue("MinRTO", "Minimum retransmission timeout for TCP sockets in microseconds", MinRTO);
 
 /*
     cmd.AddValue("SlotFormat", "format of NRawSlotCount, -1 will auto calculate based on raw slot num", SlotFormat);
@@ -59,17 +62,14 @@ Configuration::Configuration(int argc, char *argv[]) {
 
 
 
-    cmd.AddValue("MinRTO", "Minimum retransmission timeout for TCP sockets in microseconds", MinRTO);
     cmd.AddValue("TCPConnectionTimeout", "TCP Connection timeout to use for all Tcp Sockets", TCPConnectionTimeout);
 
-    cmd.AddValue("TCPSegmentSize", "TCP Segment size in bytes", TCPSegmentSize);
     cmd.AddValue("TCPInitialSlowStartThreshold", "TCP Initial slow start threshold in segments", TCPInitialSlowStartThreshold);
     cmd.AddValue("TCPInitialCwnd", "TCP Initial congestion window in segments", TCPInitialCwnd);
 
 
     cmd.AddValue("IpCameraMotionPercentage", "Probability the ip camera detects motion each second [0-1]", ipcameraMotionPercentage);
     cmd.AddValue("IpCameraMotionDuration", "Time in seconds to stream data when motion was detected", ipcameraMotionDuration);
-    cmd.AddValue("IpCameraDataRate", "Data rate of the captured stream in kbps", ipcameraDataRate);
 
     cmd.AddValue("FirmwareSize", "Size of the firmware that will be sent to clients for update", firmwareSize);
     cmd.AddValue("FirmwareBlockSize", "The chunk size of a piece of firmware. The client has to acknowledge each chunk before the next will be sent", firmwareBlockSize);

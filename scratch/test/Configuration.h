@@ -79,7 +79,7 @@ struct Configuration {
 	/*
 	 * Le's config params
 	 * */
-	uint32_t payloadSize = 100;
+	uint32_t payloadSize = 256;
 	string folder="./scratch/";
 	string file="./scratch/mac-sta.txt";
 	string TrafficPath="./OptimalRawGroup/traffic/data-32-0.82.txt";
@@ -107,14 +107,14 @@ struct Configuration {
 	/*
 	 * tcpipcamera configuration parameters
 	 * */
-	double ipcameraMotionPercentage = 0;//1; //10.1
-	uint16_t ipcameraMotionDuration = 0;//10; //60
-	uint16_t ipcameraDataRate = 0;//128; //20
-	uint32_t MinRTO = 0;//81920000; //819200
-	uint32_t TCPConnectionTimeout = 0;//6000000;
-	uint32_t TCPSegmentSize  = 0;//3216; //536
-	uint32_t TCPInitialSlowStartThreshold = 0;//0xffff;
-	uint32_t TCPInitialCwnd = 0;//1;
+	double ipcameraMotionPercentage = 1;//1; //10.1
+	uint16_t ipcameraMotionDuration = 10;//10; //60
+	uint16_t ipcameraDataRate = 128;//128; //20
+	uint32_t MinRTO = 1024000;//81920000; //819200
+	uint32_t TCPConnectionTimeout = 6000000;//6000000;
+	uint32_t TCPSegmentSize  = 3216;//3216; //536
+	uint32_t TCPInitialSlowStartThreshold = 0xffff;//0xffff;
+	uint32_t TCPInitialCwnd = 1;//1;
 
 	int ContentionPerRAWSlot=0; //-1
 	bool ContentionPerRAWSlotOnlyInFirstGroup=false; //false

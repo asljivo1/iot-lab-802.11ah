@@ -363,6 +363,8 @@ void onSTAAssociated(int i) {
 			configureTCPPingPongServer();
 			configureTCPPingPongClients();
 		} else if (config.trafficType == "tcpipcamera") {
+
+
 			configureTCPIPCameraServer();
 			configureTCPIPCameraClients();
 		} else if (config.trafficType == "tcpfirmware") {
@@ -1510,7 +1512,7 @@ void PhyStateTrace(std::string context, Time start, Time duration,
 
 int main(int argc, char *argv[]) {
 	PacketMetadata::Enable();
-
+	Config::SetDefault("ns3::TcpL4Protocol::SocketType", StringValue("ns3::TcpWestwood"));
 	//LogComponentEnable ("UdpServer", LOG_LEVEL_INFO);
 	//LogComponentEnable ("UdpEchoServerApplication", LOG_LEVEL_INFO);
 	//LogComponentEnable ("UdpEchoClientApplication", LOG_LEVEL_INFO);
@@ -1524,6 +1526,8 @@ int main(int argc, char *argv[]) {
 
 	bool OutputPosition = true;
 	config = Configuration(argc, argv);
+
+
 
 	config.rps = configureRAW(config.rps, config.RAWConfigFile);
 	config.Nsta = config.NRawSta;
@@ -1541,6 +1545,9 @@ int main(int argc, char *argv[]) {
 					+ std::to_string(config.NGroup) + "Group_"
 					+ std::to_string(config.NRawSlotNum) + "slots_"
 					+ std::to_string(config.ipcameraDataRate) + "Kbps_"
+					+ std::to_string(config.MinRTO) + "_"
+					+ std::to_string(config.TCPSegmentSize) + "_"
+					+ config.DataMode + "_"
 					+ std::to_string(config.BeaconInterval) + "BI" + ".nss";
 	}
 	else if (config.trafficType == "udp" || config.trafficType == "udpecho")
@@ -1596,6 +1603,13 @@ int main(int argc, char *argv[]) {
 			config.totalRawSlots, 0);
 
 	RngSeedManager::SetSeed(config.seed);
+
+	Config::SetDefault("ns3::TcpSocketBase::MinRto", TimeValue(MicroSeconds(config.MinRTO)));
+	//Config::SetDefault("ns3::TcpSocketBase::ConnTimeout", TimeValue(MicroSeconds(config.TCPConnectionTimeout)));
+	//Config::SetDefault("ns3::TcpSocketBase::SegmentSize", UintegerValue(config.TCPSegmentSize));
+	//Config::SetDefault("ns3::TcpSocketBase::InitialSlowStartThreshold", UintegerValue(config.MinRTO));
+	//Config::SetDefault("ns3::TcpSocketBase::InitialCwnd", UintegerValue(config.TCPInitialCwnd));
+
 
 	wifiStaNode.Create(config.Nsta);
 	wifiApNode.Create(1);
@@ -1886,12 +1900,12 @@ int main(int argc, char *argv[]) {
 			rtPacketsDelivered += stats.get(i).NumberOfSuccessfulPackets;
 		}
 		pay += stats.get(i).TotalPacketPayloadSize;
-		cout << i << " sent: " << stats.get(i).NumberOfSentPackets
+		/*cout << i << " sent: " << stats.get(i).NumberOfSentPackets
 				<< "\t" << "; delivered: " << stats.get(i).NumberOfSuccessfulPackets
 				<< "\t" << "; echoed: " << stats.get(i).NumberOfSuccessfulRoundtripPackets
 				<< "\t" << "; packetloss: " << stats.get(i).GetPacketLoss(config.trafficType)
 				//<< "\t" << "; remaining TX queue len: " << nodes[i]->queueLength
-				<< endl;
+				<< endl;*/
 	}
 	avgLatency /= config.Nsta;
 	if (config.trafficType == "udp")
@@ -1935,13 +1949,13 @@ int main(int argc, char *argv[]) {
 		double ulThroughput = 0, dlThroughput = 0;
 		ulThroughput = totalSuccessfulPackets * config.payloadSize * 8 / ((config.simulationTime + config.CoolDownPeriod - stats.TimeWhenEverySTAIsAssociated.GetSeconds()) * 1000000.0);
 		dlThroughput = totalPacketsEchoed * config.payloadSize * 8 / ((config.simulationTime + config.CoolDownPeriod - stats.TimeWhenEverySTAIsAssociated.GetSeconds()) * 1000000.0);
-		cout << "totalPacketsSent " << totalSentPackets << endl;
+		/*cout << "totalPacketsSent " << totalSentPackets << endl;
 		cout << "totalPacketsDelivered " << totalSuccessfulPackets << endl;
 		cout << "totalPacketsEchoed " << totalPacketsEchoed << endl;
 		cout << "UL packets lost " << totalSentPackets - totalSuccessfulPackets << endl;
 		cout << "DL packets lost " << rtPacketsDelivered - totalPacketsEchoed << endl;
-		cout << "Total packets lost " << totalSentPackets - totalSuccessfulPackets + rtPacketsDelivered - totalPacketsEchoed << endl;
-		cout << "Average latency = " << avgLatency << std::endl;
+		cout << "Total packets lost " << totalSentPackets - totalSuccessfulPackets + rtPacketsDelivered - totalPacketsEchoed << endl;*/
+		cout << "Average latency = " << avgLatency << " ms" << std::endl;
 		/*cout << "uplink throughput Mbit/s " << ulThroughput << endl;
 				cout << "downlink throughput Mbit/s " << dlThroughput << endl;*/
 
@@ -2002,13 +2016,13 @@ int main(int argc, char *argv[]) {
 		i++;
 	}
 	 cout << endl;
-	 cout << "Total energ = " << totalEnerg << endl;
-	 cout << "sleep time = " << totalSleepTime << endl;
-	 cout << "TX time = " << totalTxTime << endl;
-	 cout << "RX time = " << totalRxTime << endl << endl;
+	 cout << "Total energy = " << totalEnerg << " mJ" << endl;
+	 cout << "sleep time = " << totalSleepTime << "s" << endl;
+	 cout << "TX time = " << totalTxTime << "s" << endl;
+	 cout << "RX time = " << totalRxTime << "s" << endl << endl;
 
-	 cout << "Active time = " << totalActive << endl;
-	 cout << "Doze time = " << totalDoze << endl;
+	 /*cout << "Active time = " << totalActive << endl;
+	 cout << "Doze time = " << totalDoze << endl;*/
 
 	risultati.close();
 	return 0;

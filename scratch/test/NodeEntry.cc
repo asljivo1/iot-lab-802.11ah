@@ -720,6 +720,7 @@ void NodeEntry::OnTcpIPCameraDataSent(uint16_t nrOfBytes) {
 
 void NodeEntry::OnTcpIPCameraDataReceivedAtAP(uint16_t nrOfBytes) {
 	stats->get(this->id).IPCameraTotalDataReceivedAtAP += nrOfBytes;
+	stats->get(this->id).EndApplicationTime = Simulator::Now();
 }
 
 void NodeEntry::OnCollision(std::string context, uint32_t nrOfBackoffSlots) {
