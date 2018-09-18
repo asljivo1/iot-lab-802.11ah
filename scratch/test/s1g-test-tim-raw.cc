@@ -381,6 +381,7 @@ void onSTAAssociated(int i) {
 			configureCoapClients();
 		}
 		updateNodesQueueLength();
+		std::cout << "Clients and server configured, running simulation..." << std::endl;
 	}
 }
 
@@ -1513,8 +1514,8 @@ int main(int argc, char *argv[]) {
 	//LogComponentEnable ("UdpServer", LOG_LEVEL_INFO);
 	//LogComponentEnable ("UdpEchoServerApplication", LOG_LEVEL_INFO);
 	//LogComponentEnable ("UdpEchoClientApplication", LOG_LEVEL_INFO);
-	//LogComponentEnable ("CoapClient", LOG_LEVEL_INFO);
-	//LogComponentEnable ("CoapServer", LOG_LEVEL_INFO);
+	LogComponentEnable ("CoapClient", LOG_LEVEL_INFO);
+	LogComponentEnable ("CoapServer", LOG_LEVEL_INFO);
 
 	//LogComponentEnable ("ApWifiMac", LOG_LEVEL_DEBUG);
 	//LogComponentEnable ("StaWifiMac", LOG_LEVEL_DEBUG);
@@ -1869,8 +1870,10 @@ int main(int argc, char *argv[]) {
 
 	// Visualizer throughput
 	int pay = 0, totalSuccessfulPackets = 0, totalSentPackets = 0, totalPacketsEchoed = 0, rtPacketsDelivered = 0;
+	double avgLatency = 0;
 	for (int i = 0; i < config.Nsta; i++)
 	{
+		avgLatency += stats.get(i).getAveragePacketSentReceiveTime();
 		totalSuccessfulPackets += stats.get(i).NumberOfSuccessfulPackets;
 		totalSentPackets += stats.get(i).NumberOfSentPackets;
 		totalPacketsEchoed += stats.get(i).NumberOfSuccessfulRoundtripPackets;
@@ -1886,7 +1889,7 @@ int main(int argc, char *argv[]) {
 				//<< "\t" << "; remaining TX queue len: " << nodes[i]->queueLength
 				<< endl;
 	}
-
+	avgLatency /= config.Nsta;
 	if (config.trafficType == "udp")
 	{
 		double throughput = 0;
@@ -1934,14 +1937,14 @@ int main(int argc, char *argv[]) {
 		cout << "UL packets lost " << totalSentPackets - totalSuccessfulPackets << endl;
 		cout << "DL packets lost " << rtPacketsDelivered - totalPacketsEchoed << endl;
 		cout << "Total packets lost " << totalSentPackets - totalSuccessfulPackets + rtPacketsDelivered - totalPacketsEchoed << endl;
-
+		cout << "Average latency = " << avgLatency << std::endl;
 		/*cout << "uplink throughput Mbit/s " << ulThroughput << endl;
 				cout << "downlink throughput Mbit/s " << dlThroughput << endl;*/
 
 		double throughput = (totalSuccessfulPackets + totalPacketsEchoed) * config.payloadSize * 8 / ((config.simulationTime + config.CoolDownPeriod - stats.TimeWhenEverySTAIsAssociated.GetSeconds()) * 1000000.0);
 		//cout << "Time apps stoped=" << stats.EndApplicationTime.GetSeconds() << " s" << endl;
 		std::cout << "datarate" << "\t" << "throughput Kbit/s" << std::endl;
-		std::cout << config.datarate << "\t" << throughput * 1000 << " Kbit/s" << std::endl;
+		std::cout << config.datarate << "\t\t" << throughput * 1000 << " Kbit/s" << std::endl;
 	}
 	cout << "total packet loss % "
 			<< 100 - 100. * (totalSuccessfulPackets + totalPacketsEchoed) / (totalSentPackets + rtPacketsDelivered) << endl;

@@ -601,7 +601,7 @@ void NodeEntry::OnUdpPacketReceivedAtAP(Ptr<const Packet> packet) {
 		//cout << "+++++++++++udpPacketReceivedAtServer" << endl;
 		if (stats->get(this->id).NumberOfSuccessfulPackets >= stats->get(this->id).NumberOfSentPackets)
 		{
-			cout << "+++++++++++" << Simulator::Now ().GetSeconds() <<": ACK bug" << endl;
+			//cout << "+++++++++++" << Simulator::Now ().GetSeconds() <<": ACK bug" << endl;
 			//stats->get(this->id).NumberOfSuccessfulPackets = stats->get(this->id).NumberOfSentPackets;
 			return;
 		}

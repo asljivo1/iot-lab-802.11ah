@@ -30,7 +30,7 @@ struct Configuration {
 	uint64_t totalRawSlots = 0;			// Total number of RAW slots in all RAW groups in all RPS elements
 
 	UintegerValue maxNumberOfPackets = 4294967295u; ///4294967295u
-	string trafficType = "udp"; // important - udp is considered to be only uplink in NodeStatistics::GetPacketLoss tcpipcamera tcpfirmware
+	string trafficType = "coap"; // important - udp is considered to be only uplink in NodeStatistics::GetPacketLoss tcpipcamera tcpfirmware
 
 	// Page slicing
 	pageSlice pageS;
